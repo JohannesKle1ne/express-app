@@ -10,7 +10,7 @@ app.get("/s", function (req, res) {
   res.send(`IP: ${ip}`);
 });
 
-var server = app.listen(8081, function () {
+var server = app.listen(process.env.PORT || 8080, function () {
   var port = server.address().port;
   console.log(`Server running on Port ${port}`);
 });
