@@ -2,16 +2,17 @@
   "name": "task2",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "publish": "git push heroku main"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "jsdom": "^20.0.2"
   },
   "engines": {
     "node": "14.x"
