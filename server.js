@@ -92,10 +92,10 @@ function getDiv(text) {
 function wrapInHtml(content) {
   const script = `<script>if (window.DeviceOrientationEvent) 
   {window.addEventListener("deviceorientation", function (event) {
-    console.log(event)
+        alert([event.beta, event.gamma]);
         console.log([event.beta, event.gamma]);
     }, true);
-}else{console.log("DeviceOrientationEvent not found");
+}else{alert("DeviceOrientationEvent not found");
 }</script>`;
   return `<!doctype html><html><body>${script}${content}</body></html>`;
 }
