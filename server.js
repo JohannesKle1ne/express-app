@@ -90,16 +90,9 @@ function getDiv(text) {
 }
 
 function wrapInHtml(content) {
-  const script = `<script>if (window.DeviceOrientationEvent) 
-  {window.addEventListener("deviceorientation", function (event) {
-        console.log([event.beta, event.gamma]);
-        const div = document.createElement('div');
-        div.textContent = event.beta +' '+ event.gamma;
-        document.querySelector('body').appendChild(div)
-    }, true);
-}else{alert("DeviceOrientationEvent not found");
-}</script>`;
-  return `<!doctype html><html><body>${script}${content}</body></html>`;
+  const script = fs.readFileSync("./script.js", "utf8");
+  const scriptHtml = `<script>${script}</script>`;
+  return `<!doctype html><html><body>${scriptHtml}${content}</body></html>`;
 }
 
 function jsonToHtml(json) {
