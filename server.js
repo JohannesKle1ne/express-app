@@ -92,7 +92,6 @@ function getDiv(text) {
 function wrapInHtml(content) {
   const script = `<script>if (window.DeviceOrientationEvent) 
   {window.addEventListener("deviceorientation", function (event) {
-        alert([event.beta, event.gamma]);
         console.log([event.beta, event.gamma]);
         const div = document.createElement('div');
         div.textContent = event.beta +' '+ event.gamma;
