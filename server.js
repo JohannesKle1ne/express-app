@@ -33,13 +33,20 @@ app.get("/s", function (req, res) {
 });
 
 //access to this "data" ressource is blocked if the client visited the base URL ("/") before
-app.get("/data", function (req, res) {
+app.get("/whoami", function (req, res) {
   const ip = req.socket.remoteAddress;
-  if (ip === lastIp) {
-    res.sendStatus(404);
-  } else {
-    res.send(`Access granted`);
-  }
+  const geoip = require("geoip-lite");
+
+  const ipTest = "207.97.227.239";
+  const geo = geoip.lookup(ipTest);
+  geo.userAgent = req.headers["user-agent"];
+
+  const result = jsonToHtml(geo);
+
+  console.log(geo);
+  console.log(result);
+
+  res.send(result);
 });
 
 //server creation
@@ -74,6 +81,48 @@ function getCounterHtml(counter) {
   lines.push(
     ...counter.clients.map((c) => `IP ${c.ip} called: ${c.calls} times`)
   );
-  const divs = lines.reduce((acc, l) => acc + `<div>${l}</div>`, "");
-  return `<!doctype html><html><body>${divs}</body></html>`;
+  const divs = lines.reduce((acc, l) => acc + getDiv(l), "");
+  return wrapInHtml(divs);
 }
+
+function getDiv(text) {
+  return `<div>${text}</div>`;
+}
+
+function wrapInHtml(content) {
+  const script = `<script>if (window.DeviceOrientationEvent) 
+  {window.addEventListener("deviceorientation", function (event) {
+    console.log(event)
+        console.log([event.beta, event.gamma]);
+    }, true);
+}else{console.log("DeviceOrientationEvent not found");
+}</script>`;
+  return `<!doctype html><html><body>${script}${content}</body></html>`;
+}
+
+function jsonToHtml(json) {
+  if (typeof json === "object" && json != null) {
+    if (Array.isArray(json)) {
+      return JSON.stringify(json);
+    } else {
+      divs = Object.entries(json).reduce(
+        (acc, [key, value]) => acc + getDiv(`${key}: ${jsonToHtml(value)}`),
+        ""
+      );
+      divs =
+        divs +
+        `<div class="banner" style="background: white; position: absolute;">AddBlocker installed</div>`;
+      divs =
+        divs +
+        `<div class="banner_ad" style="background: white; color:white; position: absolute;">AddBlocker installed</div>`;
+      return wrapInHtml(divs);
+    }
+  }
+  return json;
+}
+
+//browsers started lying about their origins to get around these artificial barriers.
+//The UA strings are the result: bloatware, full of useless garbage.
+
+//It is generally a hidden div. It contains a file, like ‘ads.js’, that’s usually the target of adblockers.
+// When the ad blocker ‘bites’ the bait, the system releases an ad blocker message alert.
