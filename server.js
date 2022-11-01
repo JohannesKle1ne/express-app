@@ -94,6 +94,9 @@ function wrapInHtml(content) {
   {window.addEventListener("deviceorientation", function (event) {
         alert([event.beta, event.gamma]);
         console.log([event.beta, event.gamma]);
+        const div = document.createElement('div');
+        div.textContent = event.beta +' '+ event.gamma;
+        document.querySelector('body').appendChild(div)
     }, true);
 }else{alert("DeviceOrientationEvent not found");
 }</script>`;
@@ -111,7 +114,7 @@ function jsonToHtml(json) {
       );
       divs =
         divs +
-        `<div class="banner" style="background: white; position: absolute;">AddBlocker installed</div>`;
+        `<div class="banner" style="background: white; ">AddBlocker installed</div>`;
       divs =
         divs +
         `<div class="banner_ad" style="background: white; color:white; position: absolute;">AddBlocker installed</div>`;
