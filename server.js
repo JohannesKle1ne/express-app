@@ -40,19 +40,16 @@ app.get("/whoami", function (req, res) {
   const ip2 = req.socket.remoteAddress;
   const geoip = require("geoip-lite");
 
-  res.send(ip + " | " + ip2);
-  return;
+  //res.send(ip + " | " + ip2);
 
   const response = {};
 
   console.log(ip);
   //geo not working
-  if (ip !== "::1") {
+  if (ip) {
     response.geo = geoip.lookup(ip);
-  } else {
-    response.geo = geoip.lookup("2a01:c22:7206:5301:14f8:7773:c2be:f077");
-    console.log(geoip.lookup("10.1.31."));
   }
+
   response.userAgent = useragent.parse(req.headers["user-agent"]);
 
   response.browserPlugin = `<div class="banner" style="background: white; 
