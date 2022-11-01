@@ -3,6 +3,8 @@ const express = require("express");
 
 const fs = require("fs");
 
+const useragent = require("useragent");
+
 const app = express();
 
 //ip address of last client
@@ -37,16 +39,32 @@ app.get("/whoami", function (req, res) {
   const ip = req.socket.remoteAddress;
   const geoip = require("geoip-lite");
 
-  const ipTest = "207.97.227.239";
-  const geo = geoip.lookup(ipTest);
-  geo.userAgent = req.headers["user-agent"];
+  const response = {};
+  if (ip !== "::1") {
+    response.geo = geoip.lookup(ip);
+  } else {
+    response.geo = geoip.lookup("207.97.227.239");
+  }
+  response.userAgent = useragent.parse(req.headers["user-agent"]);
 
-  const result = jsonToHtml(geo);
+  response.browserPlugin = `<div class="banner" style="background: white; 
+  position: absolute;">AddBlocker installed</div><div 
+  class="banner_ad" style="background: white; color:white; position: absolute; 
+  ">AddBlocker installed</div>`;
 
-  console.log(geo);
-  console.log(result);
+  const div = jsonToDiv(response);
 
-  res.send(result);
+  const script = fs.readFileSync("./script.js", "utf8");
+
+  const html = wrapInHtml(div, script);
+  res.send(html);
+});
+
+app.get("/adapt2user", function (req, res) {
+  const firefox = fs.readFileSync("./firefox.html", "utf8");
+  const chrome = fs.readFileSync("./chrome.html", "utf8");
+  const windows = fs.readFileSync("./windows.html", "utf8");
+  res.send(windows + chrome);
 });
 
 //server creation
@@ -86,32 +104,20 @@ function getCounterHtml(counter) {
 }
 
 function getDiv(text) {
-  return `<div>${text}</div>`;
+  return `<div style="padding:10px">${text}</div>`;
 }
 
-function wrapInHtml(content) {
-  const script = fs.readFileSync("./script.js", "utf8");
+function wrapInHtml(content, script) {
   const scriptHtml = `<script>${script}</script>`;
   return `<!doctype html><html><body>${scriptHtml}${content}</body></html>`;
 }
 
-function jsonToHtml(json) {
-  if (typeof json === "object" && json != null) {
-    if (Array.isArray(json)) {
-      return JSON.stringify(json);
-    } else {
-      divs = Object.entries(json).reduce(
-        (acc, [key, value]) => acc + getDiv(`${key}: ${jsonToHtml(value)}`),
-        ""
-      );
-      divs =
-        divs +
-        `<div class="banner" style="background: white; ">AddBlocker installed</div>`;
-      divs =
-        divs +
-        `<div class="banner_ad" style="background: white; color:white; position: absolute;">AddBlocker installed</div>`;
-      return wrapInHtml(divs);
-    }
+function jsonToDiv(json) {
+  if (typeof json === "object" && json != null && !Array.isArray(json)) {
+    return Object.entries(json).reduce(
+      (acc, [key, value]) => acc + getDiv(`${key}: ${jsonToDiv(value)}`),
+      ""
+    );
   }
   return json;
 }
