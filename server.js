@@ -36,7 +36,7 @@ app.get("/s", function (req, res) {
 
 //access to this "data" ressource is blocked if the client visited the base URL ("/") before
 app.get("/whoami", function (req, res) {
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const ip = req.headers["X-Forwarded-For"] || req.socket.remoteAddress;
   const geoip = require("geoip-lite");
 
   const response = {};
