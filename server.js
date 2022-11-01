@@ -16,7 +16,7 @@ let counter = 0;
 //HTTP GET
 //the counter increases everytime the same ip address requests the resource
 app.get("/", function (req, res) {
-  const ip = req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
   const counter = getCounter();
   const increasedCounter = increaseCounter(counter, ip);
