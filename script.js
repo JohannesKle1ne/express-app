@@ -6,6 +6,7 @@ if (window.DeviceOrientationEvent) {
       let div = document.getElementById("gyro");
       if (div == null) {
         div = document.createElement("div");
+        div.setAttribute("id", "gyro");
         document.querySelector("body").appendChild(div);
       }
       div.textContent = event.beta + " " + event.gamma;
