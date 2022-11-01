@@ -71,7 +71,9 @@ function setCounter(counter) {
 function getCounterHtml(counter) {
   const lines = [];
   lines.push(`Total calls: ${counter.calls}`);
-  lines.push(counter.clients.map((c) => `IP ${c.ip} called: ${c.calls} times`));
+  lines.push(
+    ...counter.clients.map((c) => `IP ${c.ip} called: ${c.calls} times`)
+  );
   const divs = lines.reduce((acc, l) => acc + `<div>${l}</div>`, "");
   return `<!doctype html><html><body>${divs}</body></html>`;
 }
