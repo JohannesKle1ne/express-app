@@ -36,14 +36,18 @@ app.get("/s", function (req, res) {
 
 //access to this "data" ressource is blocked if the client visited the base URL ("/") before
 app.get("/whoami", function (req, res) {
-  const ip = req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const geoip = require("geoip-lite");
 
   const response = {};
+
+  console.log(ip);
+  //geo not working
   if (ip !== "::1") {
     response.geo = geoip.lookup(ip);
   } else {
-    response.geo = geoip.lookup("207.97.227.239");
+    response.geo = geoip.lookup("2a01:c22:7206:5301:14f8:7773:c2be:f077");
+    console.log(geoip.lookup("10.1.31."));
   }
   response.userAgent = useragent.parse(req.headers["user-agent"]);
 
