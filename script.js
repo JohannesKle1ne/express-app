@@ -59,7 +59,11 @@ if (window.DeviceOrientationEvent) {
         div.style.cssText += "margin-top:20px";
         document.querySelector("body").appendChild(div);
       }
-      div.textContent = "device orientation: " + event.beta + " " + event.gamma;
+      div.textContent =
+        "device orientation: " +
+        Math.round(event.beta) +
+        " " +
+        Math.round(event.gamma);
     },
     true
   );

@@ -8,10 +8,7 @@ const useragent = require("useragent");
 const app = express();
 
 //ip address of last client
-let lastIp;
-
-//counts requests
-let counter = 0;
+let ips = [];
 
 //HTTP GET
 //the counter increases everytime the same ip address requests the resource
@@ -32,7 +29,7 @@ app.get("/", function (req, res) {
     ":" +
     currentdate.getSeconds();
 
-  const counter = getCounter();
+  const counter = require("./counter.json");
   const increasedCounter = increaseCounter(counter, ip);
   setCounter(increasedCounter);
 
@@ -63,7 +60,7 @@ app.get("/whoami", function (req, res) {
 
   response.ip = ip;
 
-  response.userAgent = useragent.parse(req.headers["user-agent"]);
+  response.userAgent = useragent.is(req.headers["user-agent"]);
 
   response.browserPlugin = `<div class="banner" style="background: white; 
   position: absolute;">AddBlocker installed</div><div 
@@ -79,10 +76,20 @@ app.get("/whoami", function (req, res) {
 });
 
 app.get("/adapt2user", function (req, res) {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+
+  const userAgent = useragent.parse(req.headers["user-agent"]);
+
   const firefox = fs.readFileSync("./firefox.html", "utf8");
   const chrome = fs.readFileSync("./chrome.html", "utf8");
   const windows = fs.readFileSync("./windows.html", "utf8");
-  res.send(windows + chrome);
+  const android = fs.readFileSync("./android.html", "utf8");
+  let response = "";
+  if (!ips.includes(ip)) {
+    ips.push(ip);
+    response + getDiv("Hi for the first time!");
+  }
+  response + res.send(windows + chrome);
 });
 
 //server creation
@@ -91,10 +98,6 @@ const server = app.listen(process.env.PORT || 8080, function () {
   const port = server.address().port;
   console.log(`Server running on Port ${port}`);
 });
-
-function getCounter() {
-  return require("./counter.json");
-}
 
 function increaseCounter(counter, ip) {
   counter.calls++;
