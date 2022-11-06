@@ -78,7 +78,7 @@ app.get("/whoami", function (req, res) {
 app.get("/adapt2user", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-  const userAgent = useragent.parse(req.headers["user-agent"]);
+  const userAgent = useragent.is(req.headers["user-agent"]);
 
   const firefox = fs.readFileSync("./firefox.html", "utf8");
   const chrome = fs.readFileSync("./chrome.html", "utf8");
@@ -87,9 +87,14 @@ app.get("/adapt2user", function (req, res) {
   let response = "";
   if (!ips.includes(ip)) {
     ips.push(ip);
-    response + getDiv("Hi for the first time!");
+    response += getDiv("Hi for the first time!");
   }
-  response + res.send(windows + chrome);
+  if (userAgent.android) {
+    response += android;
+  } else {
+    response += windows;
+  }
+  res.send(response);
 });
 
 //server creation
