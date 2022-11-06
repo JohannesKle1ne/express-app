@@ -18,11 +18,25 @@ let counter = 0;
 app.get("/", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
+  var currentdate = new Date();
+  var datetime =
+    currentdate.getDate() +
+    "." +
+    (currentdate.getMonth() + 1) +
+    "." +
+    currentdate.getFullYear() +
+    "   " +
+    currentdate.getHours() +
+    ":" +
+    currentdate.getMinutes() +
+    ":" +
+    currentdate.getSeconds();
+
   const counter = getCounter();
   const increasedCounter = increaseCounter(counter, ip);
   setCounter(increasedCounter);
 
-  const counterHtml = getCounterHtml(increasedCounter);
+  const counterHtml = getCounterHtml(datetime, increasedCounter);
 
   res.send(counterHtml);
 });
@@ -37,19 +51,17 @@ app.get("/s", function (req, res) {
 //access to this "data" ressource is blocked if the client visited the base URL ("/") before
 app.get("/whoami", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  const ip2 = req.headers["x-forwarded-for"];
   const geoip = require("geoip-lite");
-
-  //res.send(ip + " | " + ip2);
 
   const response = {};
 
   console.log(ip);
-  console.log(ip2);
-  //geo not working
+
   if (ip) {
     response.geo = geoip.lookup(ip);
   }
+
+  response.ip = ip;
 
   response.userAgent = useragent.parse(req.headers["user-agent"]);
 
@@ -99,8 +111,9 @@ function setCounter(counter) {
   fs.writeFileSync("counter.json", JSON.stringify(counter));
 }
 
-function getCounterHtml(counter) {
+function getCounterHtml(date, counter) {
   const lines = [];
+  lines.push(date);
   lines.push(`Total calls: ${counter.calls}`);
   lines.push(
     ...counter.clients.map((c) => `IP ${c.ip} called: ${c.calls} times`)

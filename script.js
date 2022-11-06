@@ -1,3 +1,5 @@
+//download speed
+
 //https://www.geeksforgeeks.org/how-to-detect-network-speed-using-javascript/
 
 var userImageLink =
@@ -42,6 +44,8 @@ function displaySpeed() {
     " Mbps\n";
   document.querySelector("body").appendChild(div);
 }
+
+//gyroscope
 
 if (window.DeviceOrientationEvent) {
   window.addEventListener(
