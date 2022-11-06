@@ -1,13 +1,16 @@
 //library for HTTP Server setup
 const express = require("express");
 
+//library for access to file system
 const fs = require("fs");
 
+//parses user agent from request
 const useragent = require("useragent");
 
+//rest api library
 const app = express();
 
-//ip address of last client
+//ip address of previous clients
 let ips = [];
 
 //HTTP GET
@@ -15,8 +18,8 @@ let ips = [];
 app.get("/", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-  var currentdate = new Date();
-  var datetime =
+  const currentdate = new Date();
+  const datetime =
     currentdate.getDate() +
     "." +
     (currentdate.getMonth() + 1) +
@@ -33,30 +36,18 @@ app.get("/", function (req, res) {
   const increasedCounter = increaseCounter(counter, ip);
   setCounter(increasedCounter);
 
-  const counterHtml = getCounterHtml(datetime, increasedCounter);
-
-  res.send(counterHtml);
+  res.send(getCounterHtml(datetime, increasedCounter));
 });
 
 //HTTP GET
-//returns the clinets ip-address
-app.get("/s", function (req, res) {
-  const ip = req.socket.remoteAddress;
-  res.send(`IP: ${ip}`);
-});
-
-//access to this "data" ressource is blocked if the client visited the base URL ("/") before
+//returns information about the client
 app.get("/whoami", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const geoip = require("geoip-lite");
 
   const response = {};
 
-  console.log(ip);
-
-  if (ip) {
-    response.geo = geoip.lookup(ip);
-  }
+  response.geo = geoip.lookup(ip);
 
   response.ip = ip;
 
@@ -71,10 +62,11 @@ app.get("/whoami", function (req, res) {
 
   const script = fs.readFileSync("./script.js", "utf8");
 
-  const html = wrapInHtml(div, script);
-  res.send(html);
+  res.send(`<script>${script}</script>` + div);
 });
 
+//HTTP GET
+//returns different results for different users
 app.get("/adapt2user", function (req, res) {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
@@ -94,16 +86,23 @@ app.get("/adapt2user", function (req, res) {
   } else {
     response += windows;
   }
+  if (userAgent.chrome) {
+    response += chrome;
+  }
+  if (userAgent.firefox) {
+    response += firefox;
+  }
+
   res.send(response);
 });
 
-//server creation
-//port can be changed for local environment
+//start server
 const server = app.listen(process.env.PORT || 8080, function () {
   const port = server.address().port;
   console.log(`Server running on Port ${port}`);
 });
 
+//increases the counter in of one client in the json
 function increaseCounter(counter, ip) {
   counter.calls++;
   const client = counter.clients.find((c) => c.ip === ip);
@@ -115,10 +114,12 @@ function increaseCounter(counter, ip) {
   return counter;
 }
 
+//writes new ip counter json to storage
 function setCounter(counter) {
   fs.writeFileSync("counter.json", JSON.stringify(counter));
 }
 
+//returns html to display current counter
 function getCounterHtml(date, counter) {
   const lines = [];
   lines.push(date);
@@ -126,20 +127,15 @@ function getCounterHtml(date, counter) {
   lines.push(
     ...counter.clients.map((c) => `IP ${c.ip} called: ${c.calls} times`)
   );
-  const divs = lines.reduce((acc, l) => acc + getDiv(l), "");
-  return wrapInHtml(divs);
+  return lines.reduce((acc, l) => acc + getDiv(l), "");
 }
 
+//wraps text in div
 function getDiv(text) {
   return `<div style="padding:10px">${text}</div>`;
 }
 
-//split this into add scrip / add Wrapper
-function wrapInHtml(content, script) {
-  const scriptHtml = `<script>${script}</script>`;
-  return `<!doctype html><html><body>${scriptHtml}${content}</body></html>`;
-}
-
+//creates divs from json
 function jsonToDiv(json) {
   if (typeof json === "object" && json != null && !Array.isArray(json)) {
     return Object.entries(json).reduce(
@@ -149,9 +145,3 @@ function jsonToDiv(json) {
   }
   return json;
 }
-
-//browsers started lying about their origins to get around these artificial barriers.
-//The UA strings are the result: bloatware, full of useless garbage.
-
-//It is generally a hidden div. It contains a file, like ‘ads.js’, that’s usually the target of adblockers.
-// When the ad blocker ‘bites’ the bait, the system releases an ad blocker message alert.

@@ -1,6 +1,5 @@
 //download speed
-
-//https://www.geeksforgeeks.org/how-to-detect-network-speed-using-javascript/
+//source: https://www.geeksforgeeks.org/how-to-detect-network-speed-using-javascript/
 
 var userImageLink =
   "https://media.geeksforgeeks.org/wp-content/cdn-uploads/20200714180638/CIP_Launch-banner.png";
@@ -46,6 +45,7 @@ function displaySpeed() {
 }
 
 //gyroscope
+//docs: https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientation_event
 
 if (window.DeviceOrientationEvent) {
   window.addEventListener(
@@ -72,6 +72,7 @@ if (window.DeviceOrientationEvent) {
 }
 
 //location
+//docs: https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
 
 if (navigator.geolocation) {
   let p;
@@ -79,7 +80,7 @@ if (navigator.geolocation) {
     p = position;
     div = document.createElement("div");
     div.style.cssText += "margin-top:20px";
-    div.innerHTML = `lat: ${p.coords.latitude} lon: ${p.coords.longitude}`;
+    div.innerHTML = `GPS Coordinates: lat: ${p.coords.latitude} lon: ${p.coords.longitude}`;
     document.querySelector("body").appendChild(div);
   });
 }
