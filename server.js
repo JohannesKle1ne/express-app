@@ -12,7 +12,7 @@ const app = express();
 
 //ip address of previous clients
 let ips = [];
-//
+
 //HTTP GET
 //the counter increases everytime the same ip address requests the resource
 app.get("/", function (req, res) {
