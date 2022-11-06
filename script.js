@@ -66,3 +66,16 @@ if (window.DeviceOrientationEvent) {
 } else {
   alert("DeviceOrientationEvent not found");
 }
+
+//location
+
+if (navigator.geolocation) {
+  let p;
+  navigator.geolocation.getCurrentPosition((position) => {
+    p = position;
+    div = document.createElement("div");
+    div.style.cssText += "margin-top:20px";
+    div.innerHTML = `lat: ${p.coords.latitude} lon: ${p.coords.longitude}`;
+    document.querySelector("body").appendChild(div);
+  });
+}
